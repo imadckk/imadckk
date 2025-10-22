@@ -6,8 +6,9 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 let currentDate = new Date();
-let currentLocationId = null; // Store selected location ID
+let currentLocationId = null;
 let locations = [];
+let isInitialLoad = true;
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -17,19 +18,20 @@ async function initializeApp() {
     await loadLocations();
     setupEventListeners();
     
-    // Auto-select first location if available
-    if (locations.length > 0) {
-        selectLocation(locations[0].id);
-    }
+    // Show instruction message instead of auto-loading calendar
+    showInstructionMessage();
     
-    renderCalendar();
+    // Don't render calendar until a location is selected
+    isInitialLoad = false;
 }
 
 async function loadLocations() {
     try {
+        console.log('Loading locations from database...');
+        
         const { data, error } = await supabase
             .from('locations')
-            .select('*')
+            .select('id, name, description')
             .order('name');
 
         if (error) {
@@ -51,13 +53,8 @@ async function loadLocations() {
 function updateLocationButtons() {
     const toggleContainer = document.querySelector('.btn-group');
     
-    // Clear existing buttons (except the first one if it exists)
-    const existingButtons = toggleContainer.querySelectorAll('.location-toggle');
-    existingButtons.forEach(btn => {
-        if (btn.dataset.location !== 'all') {
-            btn.remove();
-        }
-    });
+    // Clear existing buttons
+    toggleContainer.innerHTML = '';
 
     // Create buttons for each location
     locations.forEach(location => {
@@ -73,6 +70,29 @@ function updateLocationButtons() {
         
         toggleContainer.appendChild(button);
     });
+
+    // If no locations found, show message
+    if (locations.length === 0) {
+        const message = document.createElement('button');
+        message.type = 'button';
+        message.className = 'btn btn-outline-secondary';
+        message.textContent = 'No locations found';
+        message.disabled = true;
+        toggleContainer.appendChild(message);
+    }
+}
+
+function showInstructionMessage() {
+    const calendar = document.getElementById('calendar');
+    calendar.innerHTML = `
+        <div class="text-center py-5">
+            <div class="mb-3">
+                <i class="fas fa-mouse-pointer fa-2x text-muted"></i>
+            </div>
+            <h5 class="text-muted">Select a location to view availability</h5>
+            <p class="text-muted small">Click on any location button above to load the calendar</p>
+        </div>
+    `;
 }
 
 function selectLocation(locationId) {
@@ -87,17 +107,32 @@ function selectLocation(locationId) {
         }
     });
     
+    // Update calendar title with location name
+    const currentLocation = locations.find(loc => loc.id === locationId);
+    if (currentLocation) {
+        document.querySelector('h1').textContent = `${currentLocation.name} Availability Calendar`;
+    }
+    
+    // Only render calendar when a location is actively selected
     renderCalendar();
 }
 
 function setupEventListeners() {
     // Month navigation
     document.getElementById('prevMonth').addEventListener('click', () => {
+        if (!currentLocationId) {
+            alert('Please select a location first.');
+            return;
+        }
         currentDate.setMonth(currentDate.getMonth() - 1);
         renderCalendar();
     });
 
     document.getElementById('nextMonth').addEventListener('click', () => {
+        if (!currentLocationId) {
+            alert('Please select a location first.');
+            return;
+        }
         currentDate.setMonth(currentDate.getMonth() + 1);
         renderCalendar();
     });
@@ -115,10 +150,26 @@ async function renderCalendar() {
         year: 'numeric' 
     });
 
-    calendar.innerHTML = '';
+    // Show loading state
+    calendar.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading calendar...</p>
+        </div>
+    `;
 
     // Create day headers
     const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    
+    // Load date settings for the current month and selected location
+    const dateSettings = await loadDateSettingsForMonth(year, month + 1);
+
+    // Now render the actual calendar
+    calendar.innerHTML = '';
+
+    // Create day headers
     dayNames.forEach(day => {
         const dayHeader = document.createElement('div');
         dayHeader.className = 'calendar-day fw-bold text-center';
@@ -136,9 +187,6 @@ async function renderCalendar() {
         calendar.appendChild(emptyDay);
     }
 
-    // Load date settings for the current month and selected location
-    const dateSettings = await loadDateSettingsForMonth(year, month + 1);
-
     // Create days of the month
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     for (let day = 1; day <= daysInMonth; day++) {
@@ -146,7 +194,6 @@ async function renderCalendar() {
         const dayElement = document.createElement('div');
         dayElement.className = 'calendar-day';
         dayElement.textContent = day;
-        dayElement.title = dateString;
 
         // Add click handler for toggling availability
         dayElement.addEventListener('click', () => toggleDateAvailability(dateString));
@@ -164,7 +211,7 @@ function updateDayElementAppearance(dayElement, isActive, dateString) {
     dayElement.classList.remove('active-day', 'inactive-day');
     
     const currentLocation = locations.find(loc => loc.id === currentLocationId);
-    const locationName = currentLocation ? currentLocation.name : 'Selected Location';
+    const locationName = currentLocation ? currentLocation.name : 'Location';
     
     if (isActive) {
         dayElement.classList.add('active-day');
@@ -202,7 +249,7 @@ async function loadDateSettingsForMonth(year, month) {
 }
 
 function getDayStatus(dateString, dateSettings) {
-    if (!currentLocationId) return true; // Default to active if no location selected
+    if (!currentLocationId) return true;
     
     const setting = dateSettings.find(s => s.date === dateString);
     return setting ? setting.is_active : true; // Default to active if no setting exists
@@ -216,12 +263,17 @@ async function toggleDateAvailability(dateString) {
 
     try {
         // Check current status
-        const { data: existingSetting } = await supabase
+        const { data: existingSetting, error: fetchError } = await supabase
             .from('date_settings')
             .select('*')
             .eq('date', dateString)
             .eq('location_id', currentLocationId)
             .single();
+
+        if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no rows returned
+            console.error('Error fetching current setting:', fetchError);
+            return;
+        }
 
         const newStatus = !(existingSetting?.is_active ?? true);
 
@@ -258,27 +310,4 @@ async function toggleDateAvailability(dateString) {
         alert('Error updating availability. Please try again.');
     }
 }
-
-// Utility function to add sample data (optional)
-async function addSampleLocations() {
-    const sampleLocations = [
-        { name: 'Downtown Office', description: 'Main office location' },
-        { name: 'Uptown Branch', description: 'Secondary branch location' }
-    ];
-
-    for (const loc of sampleLocations) {
-        const { data, error } = await supabase
-            .from('locations')
-            .insert([loc])
-            .select();
-
-        if (error) {
-            console.error('Error creating location:', error);
-        } else {
-            console.log('Created location:', data[0]);
-        }
-    }
-}
-
-
 // addSampleLocations();
