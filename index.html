@@ -13,8 +13,15 @@
             background-color: #007bff;
             color: white;
         }
+
+        #calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+        
         .calendar-day {
-            width: 35px;
+            width: 100%;
             height: 35px;
             display: flex;
             align-items: center;
