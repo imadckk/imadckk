@@ -71,9 +71,7 @@ function updateLocationButtons() {
       toggleContainer.appendChild(button);
     });
         
-        toggleContainer.appendChild(button);
-    });
-
+      
     // If no locations found, show message
     if (locations.length === 0) {
         const message = document.createElement('button');
