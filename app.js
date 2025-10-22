@@ -159,8 +159,8 @@ async function renderCalendar() {
     // Now render the actual calendar
     calendar.innerHTML = '';
 
-    // Create day headers
-    const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    // Create day headers - 7 columns for 7 days of the week
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     dayNames.forEach(day => {
         const dayHeader = document.createElement('div');
         dayHeader.className = 'calendar-day fw-bold text-center';
@@ -168,11 +168,13 @@ async function renderCalendar() {
         calendar.appendChild(dayHeader);
     });
 
-    // Get first day of month
+    // Get first day of month and calculate starting position
     const firstDay = new Date(year, month, 1);
+    const startingDay = firstDay.getDay(); // 0 = Sunday, 1 = Monday, etc.
     
     // Add empty cells for days before the first day of month
-    for (let i = 0; i < firstDay.getDay(); i++) {
+    // This ensures dates align properly with day headers
+    for (let i = 0; i < startingDay; i++) {
         const emptyDay = document.createElement('div');
         emptyDay.className = 'calendar-day other-month';
         calendar.appendChild(emptyDay);
@@ -192,6 +194,11 @@ async function renderCalendar() {
 
         calendar.appendChild(dayElement);
     }
+
+    // Add CSS grid layout to ensure proper 7-column structure
+    calendar.style.display = 'grid';
+    calendar.style.gridTemplateColumns = 'repeat(7, 1fr)';
+    calendar.style.gap = '2px';
 }
 
 function updateDayElementAppearance(dayElement, isActive, dateString) {
