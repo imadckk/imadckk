@@ -14,14 +14,13 @@
             color: white;
         }
 
-        #calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
+       #calendar {
+            display: flex;
+            flex-wrap: wrap;
         }
         
         .calendar-day {
-            width: 100%;
+            width: calc(100% / 7 - 2px); /* 7 days with 2px gap */
             height: 35px;
             display: flex;
             align-items: center;
@@ -29,6 +28,7 @@
             margin: 1px;
             border-radius: 4px;
             font-size: 0.9em;
+            box-sizing: border-box;
         }
         .active-day {
             background-color: #d4edda;
