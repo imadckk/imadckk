@@ -18,10 +18,12 @@
             display: flex;
             flex-wrap: wrap;
             width: 100%;
+            gap: 2px;
         }
         
         .calendar-day {
             flex: 0 0 calc(14.2857% - 2px); /* Exactly 1/7 of the width minus gap */
+            width: 45px;
             height: 35px;
             display: flex;
             align-items: center;
@@ -33,13 +35,19 @@
         }
         .active-day {
             background-color: #d4edda;
+            border: 1px solid #c3e6cb;
         }
+        
         .inactive-day {
             background-color: #f8d7da;
             text-decoration: line-through;
+            border: 1px solid #f5c6cb;
         }
+        
         .other-month {
             opacity: 0.4;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
         }
     </style>
 </head>
