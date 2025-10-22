@@ -245,7 +245,27 @@ async function loadDateSettingsForMonth(year, month) {
 
 function getDayStatus(dateString, dateSettings) {
     if (!currentLocationId) return true;
-    
+
+    const today = new Date();
+    const date = new Date(dateString);
+    const dayOfWeek = date.getDay(); // 0 = Sunday
+
+    // Rule 1: Past dates and today are unavailable
+    if (date <= today.setHours(0,0,0,0)) {
+        return false;
+    }
+
+    // Rule 2: Sundays are unavailable
+    if (dayOfWeek === 0) {
+        return false;
+    }
+
+    // Rule 3: Use Supabase settings (if defined)
     const setting = dateSettings.find(s => s.date === dateString);
-    return setting ? setting.is_active : true; // Default to active if no setting exists
+    if (setting) {
+        return setting.is_active;
+    }
+
+    // Default: available unless rules above block it
+    return true;
 }
