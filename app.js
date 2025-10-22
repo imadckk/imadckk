@@ -196,9 +196,9 @@ async function renderCalendar() {
     }
 
     // Add CSS grid layout to ensure proper 7-column structure
-    calendar.style.display = 'grid';
-    calendar.style.gridTemplateColumns = 'repeat(7, 1fr)';
-    calendar.style.gap = '2px';
+    //calendar.style.display = 'grid';
+    //calendar.style.gridTemplateColumns = 'repeat(7, 1fr)';
+    //calendar.style.gap = '2px';
 }
 
 function updateDayElementAppearance(dayElement, isActive, dateString) {
