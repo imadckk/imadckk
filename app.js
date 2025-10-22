@@ -53,23 +53,23 @@ function updateLocationButtons() {
     toggleContainer.innerHTML = '';
 
     // Create buttons for each location
-    locations.forEach(location => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'btn btn-outline-primary location-toggle';
-        button.dataset.location = location.id;
-        button.textContent = location.name;
-
-        // Assign color based on position
-          if (index === 0) {
-            button.classList.add('btn-red');
-          } else if (index === 1) {
-            button.classList.add('btn-blue');
-          }
-        
-        button.addEventListener('click', () => {
-            selectLocation(location.id);
-        });
+    locations.forEach((location, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn location-toggle';
+      button.dataset.location = location.id;
+      button.textContent = location.name;
+    
+      // Assign color based on position
+      if (index === 0) {
+        button.classList.add('btn-blue');
+      } else if (index === 1) {
+        button.classList.add('btn-red');
+      }
+    
+      button.addEventListener('click', () => selectLocation(location.id));
+      toggleContainer.appendChild(button);
+    });
         
         toggleContainer.appendChild(button);
     });
