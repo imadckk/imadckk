@@ -103,7 +103,7 @@ function selectLocation(locationId) {
     // Update calendar title with location name
     const currentLocation = locations.find(loc => loc.id === locationId);
     if (currentLocation) {
-        document.querySelector('h1').textContent = `${currentLocation.name} Availability Calendar`;
+        document.querySelector('h1').textContent = `${currentLocation.name} Calendar`;
     }
     
     // Render calendar for viewing
