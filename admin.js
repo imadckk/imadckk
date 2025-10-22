@@ -121,7 +121,7 @@ function renderCalendar() {
 
   const totalDays = new Date(year, month + 1, 0).getDate();
   for (let d = 1; d <= totalDays; d++) {
-    const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const date = formatLocalDate(new Date(year, month, d));
     const el = document.createElement('div');
     el.className = 'calendar-day text-center';
     el.textContent = d;
