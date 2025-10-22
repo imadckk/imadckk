@@ -199,14 +199,16 @@ async function saveDateSettings() {
   );
 
   if (error) return showToast('Error saving settings', 'error');
+
+  // ✅ Clear cache for current month to ensure fresh reload
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const key = `${selectedLocation}-${year}-${month}`;
+  delete cache[key];
+
   showToast('Settings saved successfully', 'success');
   hideDateDetails();
-  renderCalendar();
-}
-
-function hideDateDetails() {
-  els.dateDetails.style.display = 'none';
-  selectedCalendarDate = null;
+  renderCalendar(); // now re-renders with fresh data
 }
 
 // ✅ Utility: Toast + Loading
