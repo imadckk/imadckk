@@ -59,6 +59,13 @@ function updateLocationButtons() {
         button.className = 'btn btn-outline-primary location-toggle';
         button.dataset.location = location.id;
         button.textContent = location.name;
+
+        // Assign color based on position
+          if (index === 0) {
+            button.classList.add('btn-red');
+          } else if (index === 1) {
+            button.classList.add('btn-blue');
+          }
         
         button.addEventListener('click', () => {
             selectLocation(location.id);
