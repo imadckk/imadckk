@@ -94,26 +94,37 @@ function showInstructionMessage() {
 }
 
 function selectLocation(locationId) {
-    currentLocationId = locationId;
-    
-    // Update button states
-    document.querySelectorAll('.location-toggle').forEach(btn => {
-        if (btn.dataset.location === locationId) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
-    
-    // Update calendar title with location name
-    const currentLocation = locations.find(loc => loc.id === locationId);
-    if (currentLocation) {
-        document.querySelector('h1').textContent = `${currentLocation.name} Calendar`;
+  currentLocationId = locationId;
+
+  // Update button states and colors
+  document.querySelectorAll('.location-toggle').forEach(btn => {
+    const isActive = btn.dataset.location === locationId;
+    btn.classList.toggle('active', isActive);
+
+    // Reset to outline state
+    btn.classList.remove('btn-red', 'btn-blue');
+
+    // Apply the correct color based on dataset or name
+    const location = locations.find(loc => loc.id === btn.dataset.location);
+    if (location) {
+      if (location.name.toLowerCase().includes('a')) {
+        btn.classList.add(isActive ? 'btn-blue' : 'btn-outline-primary');
+      } else if (location.name.toLowerCase().includes('b')) {
+        btn.classList.add(isActive ? 'btn-red' : 'btn-outline-danger');
+      }
     }
-    
-    // Render calendar for viewing
-    renderCalendar();
+  });
+
+  // Update calendar title with location name
+  const currentLocation = locations.find(loc => loc.id === locationId);
+  if (currentLocation) {
+    document.querySelector('h1').textContent = `${currentLocation.name} Calendar`;
+  }
+
+  // Render calendar for viewing
+  renderCalendar();
 }
+
 
 function setupEventListeners() {
     // Month navigation
