@@ -17,10 +17,11 @@
        #calendar {
             display: flex;
             flex-wrap: wrap;
+            width: 100%;
         }
         
         .calendar-day {
-            width: calc(100% / 7 - 2px); /* 7 days with 2px gap */
+            flex: 0 0 calc(14.2857% - 2px); /* Exactly 1/7 of the width minus gap */
             height: 35px;
             display: flex;
             align-items: center;
