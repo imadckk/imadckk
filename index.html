@@ -19,6 +19,7 @@
 
     /* Location Toggle Buttons */
     .btn-blue {
+      background-color: #0d6efd;
       color: #0d6efd;
       border-color: #0d6efd;
     }
@@ -28,12 +29,19 @@
     }
     
     .btn-red {
+      background-color: #dc3545;
       color: #dc3545;
       border-color: #dc3545;
     }
     .btn-red:hover, .btn-red.active {
       background-color: #dc3545;
       color: white;
+    }
+
+    /* Outline state fallback */
+    .btn-outline-primary,
+    .btn-outline-danger {
+      transition: all 0.2s ease;
     }
     
     /* Add smooth transition */
