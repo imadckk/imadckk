@@ -96,32 +96,34 @@ function showInstructionMessage() {
 function selectLocation(locationId) {
   currentLocationId = locationId;
 
-  // Update button states and colors
-  document.querySelectorAll('.location-toggle').forEach(btn => {
+  document.querySelectorAll('.location-toggle').forEach((btn, index) => {
     const isActive = btn.dataset.location === locationId;
     btn.classList.toggle('active', isActive);
 
-    // Reset to outline state
-    btn.classList.remove('btn-red', 'btn-blue');
+    // Reset all color-related classes first
+    btn.classList.remove(
+      'btn-outline-primary',
+      'btn-outline-danger',
+      'btn-red',
+      'btn-blue'
+    );
 
-    // Apply the correct color based on dataset or name
-    const location = locations.find(loc => loc.id === btn.dataset.location);
-    if (location) {
-      if (location.name.toLowerCase().includes('a')) {
-        btn.classList.add(isActive ? 'btn-blue' : 'btn-outline-primary');
-      } else if (location.name.toLowerCase().includes('b')) {
-        btn.classList.add(isActive ? 'btn-red' : 'btn-outline-danger');
-      }
+    // Apply colors consistently by index (or name)
+    if (index === 0) {
+      // Location A (Red)
+      btn.classList.add(isActive ? 'btn-red' : 'btn-outline-danger');
+    } else if (index === 1) {
+      // Location B (Blue)
+      btn.classList.add(isActive ? 'btn-blue' : 'btn-outline-primary');
     }
   });
 
-  // Update calendar title with location name
-  const currentLocation = locations.find(loc => loc.id === locationId);
+  // Update calendar title
+  const currentLocation = locations.find((loc) => loc.id === locationId);
   if (currentLocation) {
     document.querySelector('h1').textContent = `${currentLocation.name} Calendar`;
   }
 
-  // Render calendar for viewing
   renderCalendar();
 }
 
