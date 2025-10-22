@@ -47,6 +47,11 @@
             font-size: 0.9em;
             box-sizing: border-box;
         }
+
+        .legend-box {
+            width: 40px;  /* increase from default 80px/auto */
+            height: 20px; /* smaller height for a neat rectangle */
+        }
     </style>
 </head>
 <body>
@@ -92,11 +97,11 @@
             <div class="col-md-8">
                 <div class="d-flex justify-content-center gap-3">
                     <div class="d-flex align-items-center">
-                        <div class="calendar-day active-day me-2"></div>
+                        <div class="calendar-day active-day legend-box me-2"></div>
                         <small>Available</small>
                     </div>
                     <div class="d-flex align-items-center">
-                        <div class="calendar-day inactive-day me-2"></div>
+                        <div class="calendar-day inactive-day legend-box me-2"></div>
                         <small>Unavailable</small>
                     </div>
                 </div>
