@@ -13,17 +13,29 @@
             background-color: #007bff;
             color: white;
         }
-
-       #calendar {
+        
+        .active-day {
+            background-color: #d4edda;
+        }
+        
+        .inactive-day {
+            background-color: #f8d7da;
+            text-decoration: line-through;
+        }
+        
+        .other-month {
+            opacity: 0.4;
+        }
+        
+        /* Fix for calendar layout */
+        #calendar {
             display: flex;
             flex-wrap: wrap;
             width: 100%;
-            gap: 1px;
         }
         
         .calendar-day {
-            flex: 0 0 calc(14.2857% - 2px); /* Exactly 1/7 of the width minus gap */
-            width: 45px;
+            flex: 0 0 calc(14.2857% - 2px); /* 100% / 7 = 14.2857% */
             height: 35px;
             display: flex;
             align-items: center;
@@ -32,24 +44,6 @@
             border-radius: 4px;
             font-size: 0.9em;
             box-sizing: border-box;
-        }
-        .active-day {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            width: 45px;
-        }
-        
-        .inactive-day {
-            background-color: #f8d7da;
-            text-decoration: line-through;
-            border: 1px solid #f5c6cb;
-            width: 45px;
-        }
-        
-        .other-month {
-            opacity: 0.4;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
         }
     </style>
 </head>
