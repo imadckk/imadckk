@@ -127,9 +127,9 @@ function renderCalendar() {
     el.textContent = d;
     el.dataset.date = date;
 
-    if (date === new Date().toISOString().split('T')[0]) el.classList.add('today');
+    if (date === formatLocalDate(new Date())) el.classList.add('today');
 
-    el.addEventListener('click', () => showDateDetails(new Date(date)));
+    el.addEventListener('click', () => showDateDetails(new Date(year, month, d)));
     els.calendar.appendChild(el);
   }
 
@@ -196,7 +196,8 @@ async function showDateDetails(date) {
 async function saveDateSettings() {
   if (!selectedLocation || !selectedCalendarDate) return;
 
-  const date = formatLocalDate(date);
+  // ✅ Correct date usage
+  const date = formatLocalDate(selectedCalendarDate);
   const is_active = els.statusSelect.value === 'true';
   const reason = els.reasonText.value.trim();
 
@@ -213,9 +214,22 @@ async function saveDateSettings() {
   const key = `${selectedLocation}-${year}-${month}`;
   delete cache[key];
 
+  // ✅ Instant DOM update
+  const el = document.querySelector(`[data-date="${date}"]`);
+  if (el) {
+    el.classList.remove('active-day', 'inactive-day');
+    el.classList.add(is_active ? 'active-day' : 'inactive-day');
+    el.title = reason || (is_active ? 'Active' : 'Inactive');
+  }
+
   showToast('Settings saved successfully', 'success');
   hideDateDetails();
-  renderCalendar(); // now re-renders with fresh data
+  renderCalendar(); // optional re-render
+}
+
+function hideDateDetails() {
+  els.dateDetails.style.display = 'none';
+  selectedCalendarDate = null;
 }
 
 // ✅ Utility: Toast + Loading
@@ -243,4 +257,3 @@ function showLoading(isLoading) {
   }
   loader.classList.toggle('d-none', !isLoading);
 }
-
