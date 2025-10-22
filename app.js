@@ -8,7 +8,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 let currentDate = new Date();
 let currentLocationId = null;
 let locations = [];
-let isInitialLoad = true;
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -20,9 +19,6 @@ async function initializeApp() {
     
     // Show instruction message instead of auto-loading calendar
     showInstructionMessage();
-    
-    // Don't render calendar until a location is selected
-    isInitialLoad = false;
 }
 
 async function loadLocations() {
@@ -86,11 +82,8 @@ function showInstructionMessage() {
     const calendar = document.getElementById('calendar');
     calendar.innerHTML = `
         <div class="text-center py-5">
-            <div class="mb-3">
-                <i class="fas fa-mouse-pointer fa-2x text-muted"></i>
-            </div>
             <h5 class="text-muted">Select a location to view availability</h5>
-            <p class="text-muted small">Click on any location button above to load the calendar</p>
+            <p class="text-muted small">Click on any location button above to view the calendar</p>
         </div>
     `;
 }
@@ -113,7 +106,7 @@ function selectLocation(locationId) {
         document.querySelector('h1').textContent = `${currentLocation.name} Availability Calendar`;
     }
     
-    // Only render calendar when a location is actively selected
+    // Render calendar for viewing
     renderCalendar();
 }
 
@@ -160,9 +153,6 @@ async function renderCalendar() {
         </div>
     `;
 
-    // Create day headers
-    const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-    
     // Load date settings for the current month and selected location
     const dateSettings = await loadDateSettingsForMonth(year, month + 1);
 
@@ -170,6 +160,7 @@ async function renderCalendar() {
     calendar.innerHTML = '';
 
     // Create day headers
+    const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     dayNames.forEach(day => {
         const dayHeader = document.createElement('div');
         dayHeader.className = 'calendar-day fw-bold text-center';
@@ -195,10 +186,7 @@ async function renderCalendar() {
         dayElement.className = 'calendar-day';
         dayElement.textContent = day;
 
-        // Add click handler for toggling availability
-        dayElement.addEventListener('click', () => toggleDateAvailability(dateString));
-
-        // Determine day status
+        // Determine day status (READ-ONLY - no click events)
         const isActive = getDayStatus(dateString, dateSettings);
         updateDayElementAppearance(dayElement, isActive, dateString);
 
@@ -254,60 +242,3 @@ function getDayStatus(dateString, dateSettings) {
     const setting = dateSettings.find(s => s.date === dateString);
     return setting ? setting.is_active : true; // Default to active if no setting exists
 }
-
-async function toggleDateAvailability(dateString) {
-    if (!currentLocationId) {
-        alert('Please select a location first.');
-        return;
-    }
-
-    try {
-        // Check current status
-        const { data: existingSetting, error: fetchError } = await supabase
-            .from('date_settings')
-            .select('*')
-            .eq('date', dateString)
-            .eq('location_id', currentLocationId)
-            .single();
-
-        if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no rows returned
-            console.error('Error fetching current setting:', fetchError);
-            return;
-        }
-
-        const newStatus = !(existingSetting?.is_active ?? true);
-
-        if (existingSetting) {
-            // Update existing setting
-            const { error } = await supabase
-                .from('date_settings')
-                .update({ 
-                    is_active: newStatus,
-                    reason: newStatus ? 'Available' : 'Unavailable'
-                })
-                .eq('id', existingSetting.id);
-
-            if (error) throw error;
-        } else {
-            // Create new setting
-            const { error } = await supabase
-                .from('date_settings')
-                .insert([{
-                    date: dateString,
-                    location_id: currentLocationId,
-                    is_active: newStatus,
-                    reason: newStatus ? 'Available' : 'Unavailable'
-                }]);
-
-            if (error) throw error;
-        }
-
-        // Refresh the calendar
-        renderCalendar();
-
-    } catch (error) {
-        console.error('Error toggling availability:', error);
-        alert('Error updating availability. Please try again.');
-    }
-}
-// addSampleLocations();
