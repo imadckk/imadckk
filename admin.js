@@ -35,6 +35,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   renderCalendar();
 });
 
+function formatLocalDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function initDatePicker() {
   flatpickr('#datePicker', {
     dateFormat: 'Y-m-d',
@@ -164,7 +171,7 @@ function renderDateSettings(data) {
 
 async function showDateDetails(date) {
   selectedCalendarDate = date;
-  const iso = date.toISOString().split('T')[0];
+  const iso = formatLocalDate(date);
   els.selectedDate.textContent = date.toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -189,7 +196,7 @@ async function showDateDetails(date) {
 async function saveDateSettings() {
   if (!selectedLocation || !selectedCalendarDate) return;
 
-  const date = selectedCalendarDate.toISOString().split('T')[0];
+  const date = formatLocalDate(date);
   const is_active = els.statusSelect.value === 'true';
   const reason = els.reasonText.value.trim();
 
