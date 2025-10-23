@@ -264,33 +264,29 @@ async function loadDateSettingsForMonth(year, month) {
 function getDayStatus(dateString, dateSettings) {
     if (!currentLocationId) return true;
 
-    // Create dates in Malaysia timezone (UTC+8)
-    const today = new Date();
-    const todayMalaysia = new Date(today.toLocaleString("en-US", {timeZone: "Asia/Kuala_Lumpur"}));
-    todayMalaysia.setHours(0, 0, 0, 0);
+    // Get start of today in Malaysia timezone (UTC+8)
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const malaysiaTime = new Date(utc + (3600000 * 8)); // UTC+8
+    const todayMalaysia = new Date(malaysiaTime.getFullYear(), malaysiaTime.getMonth(), malaysiaTime.getDate());
     
-    const date = new Date(dateString);
-    const dateMalaysia = new Date(date.toLocaleString("en-US", {timeZone: "Asia/Kuala_Lumpur"}));
-    dateMalaysia.setHours(0, 0, 0, 0);
+    // Parse the input date
+    const [year, month, day] = dateString.split('-').map(Number);
+    const inputDate = new Date(year, month - 1, day);
     
-    const dayOfWeek = dateMalaysia.getDay(); // 0 = Sunday
+    const dayOfWeek = inputDate.getDay(); // 0 = Sunday
 
-    // Rule 1: Past dates and today are unavailable (using Malaysia timezone)
-    if (dateMalaysia < todayMalaysia) {
+    console.log('Date comparison:', {
+        dateString,
+        todayMalaysia: todayMalaysia.toISOString(),
+        inputDate: inputDate.toISOString(),
+        isPast: inputDate < todayMalaysia,
+        dayOfWeek
+    });
+
+    // Rule 1: Past dates and today are unavailable
+    if (inputDate < todayMalaysia) {
         return false;
     }
 
-    // Rule 2: Sundays are unavailable
-    if (dayOfWeek === 0) {
-        return false;
-    }
-
-    // Rule 3: Use Supabase settings (if defined)
-    const setting = dateSettings.find(s => s.date === dateString);
-    if (setting) {
-        return setting.is_active;
-    }
-
-    // Default: available unless rules above block it
-    return true;
-}
+    //
