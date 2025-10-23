@@ -289,4 +289,17 @@ function getDayStatus(dateString, dateSettings) {
         return false;
     }
 
-    //
+    // Rule 2: Sundays are unavailable
+    if (dayOfWeek === 0) {
+        return false;
+    }
+
+    // Rule 3: Use Supabase settings (if defined)
+    const setting = dateSettings.find(s => s.date === dateString);
+    if (setting) {
+        return setting.is_active;
+    }
+
+    // Default: available unless rules above block it
+    return true;
+}
