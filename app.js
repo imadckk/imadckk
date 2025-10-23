@@ -264,12 +264,19 @@ async function loadDateSettingsForMonth(year, month) {
 function getDayStatus(dateString, dateSettings) {
     if (!currentLocationId) return true;
 
+    // Create dates in Malaysia timezone (UTC+8)
     const today = new Date();
+    const todayMalaysia = new Date(today.toLocaleString("en-US", {timeZone: "Asia/Kuala_Lumpur"}));
+    todayMalaysia.setHours(0, 0, 0, 0);
+    
     const date = new Date(dateString);
-    const dayOfWeek = date.getDay(); // 0 = Sunday
+    const dateMalaysia = new Date(date.toLocaleString("en-US", {timeZone: "Asia/Kuala_Lumpur"}));
+    dateMalaysia.setHours(0, 0, 0, 0);
+    
+    const dayOfWeek = dateMalaysia.getDay(); // 0 = Sunday
 
-    // Rule 1: Past dates and today are unavailable
-    if (date <= today.setHours(0,0,0,0)) {
+    // Rule 1: Past dates and today are unavailable (using Malaysia timezone)
+    if (dateMalaysia < todayMalaysia) {
         return false;
     }
 
